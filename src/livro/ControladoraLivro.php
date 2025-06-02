@@ -10,7 +10,7 @@ class ControladoraLivro {
     private $visao = null;
 
     public function __construct( PDO $pdo, VisaoLivro $visao ) {
-        $this->respositorio = new RepositorioLivroEmBDR( $pdo );
+        $this->repositorio = new RepositorioLivroEmBDR( $pdo );
         $this->visao = $visao;
     }
 
@@ -33,11 +33,12 @@ class ControladoraLivro {
     }
 
     public function adicionar() {
-        $dados = $this->visão->obterdados();
+        $dados = $this->visao->obterdados();
+        // error_log(print_r( $dados, true));
         $livro = new Livro( 
             0,
             $dados[ 'autor' ],
-            $dados[ 'ano' ],
+            (int) $dados[ 'ano' ],
             $dados[ 'categoria' ]
         );
 
@@ -59,7 +60,7 @@ class ControladoraLivro {
     public function atualizar() {
         $dados = $this->visao->obterdados();
         $livro = new Livro( 
-            $dados[ 'id' ],
+            (int) $dados[ 'id' ],
             $dados[ 'autor' ],
             $dados[ 'ano' ],
             $dados[ 'categoria' ]

@@ -4,6 +4,7 @@ class VisaoLivro {
 
     public function obterdados() {
         $dadosJson = file_get_contents( 'php://input' );
+        // error_log(print_r( $dadosJson, true));
         $arrayDados = (array) json_decode( $dadosJson );
 
         if ( empty( $arrayDados ) ) {

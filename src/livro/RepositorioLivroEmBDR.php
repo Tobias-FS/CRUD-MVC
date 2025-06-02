@@ -1,6 +1,6 @@
 <?php
 
-require_once 'Livo.php';
+require_once 'Livro.php';
 require_once 'RepositorioLivro.php';
 require_once 'RepositorioException.php';
 
