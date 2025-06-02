@@ -1,0 +1,17 @@
+{
+    "autoload": {
+        "psr-4": {
+            "": [
+                "src/",
+                "src/livro"
+            ]
+        },
+        "files": [
+            "src/infra/conexao.php"
+        ]
+    },
+    "require": {
+        "slim/slim": "4.*",
+        "slim/psr7": "^1.7"
+    }
+}
