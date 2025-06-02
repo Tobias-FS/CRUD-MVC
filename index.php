@@ -1,9 +1,10 @@
 <?php
 
-require_once 'src/livro/ControladoraLivro.php';
-require_once 'src/livro/VisaoLivro.php';
-require_once 'src/livro/RepositorioException.php';
-require_once 'src/infra/conexao.php';
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Factory\AppFactory;
+
+require_once __DIR__ . '/vendor/autoload.php';
 
 $pdo = null;
 
@@ -15,30 +16,32 @@ try {
     exit;
 }
 
-$metodo = $_SERVER[ 'REQUEST_METHOD' ];
-$url = str_replace( dirname( $_SERVER[ 'PHP_SELF' ] ),
-        '',
-        $_SERVER[ 'REQUEST_URI' ] );
+$app = AppFactory::create();
 
-$regex = '/^\/livros\/?$/';
-$regexId = '/^\/livros\/([0-9]+)$/';
-$casamentos = [];
+$app->get( '/livros', function (Request $request, Response $response, array $args ) use ( $pdo ) {
+    $controladora = new ControladoraLivro( $pdo, new VisaoLivro( $request, $response ) );
+    $response = $controladora->listar();
+    return $response;
+});
+$app->get( '/livros/{id}', function (Request $request, Response $response, array $args ) use ( $pdo ) {
+    $controladora = new ControladoraLivro( $pdo, new VisaoLivro( $request, $response ) );
+    $response = $controladora->listarPorId( $args[ 'id' ] );
+    return $response;
+});
+$app->post( '/livros', function ($request, $response, array $args ) use ( $pdo ) {
+    $controladora = new ControladoraLivro( $pdo, new VisaoLivro( $request, $response ) );
+    $response = $controladora->adicionar();
+    return $response;
+});
+$app->put( '/livros', function ( $request, $response, array $args ) use ( $pdo ) {
+    $controladora = new ControladoraLivro( $pdo, new VisaoLivro( $request, $response ) );
+    $response = $controladora->atualizar();
+    return $response;
+});
+$app->delete( '/livros/{id}', function ($request, $response, array $args ) use ( $pdo ) {
+    $controladora = new ControladoraLivro( $pdo, new VisaoLivro( $request, $response ) );
+    $response = $controladora->remover( $args[ 'id' ] );
+    return $response;
+});
 
-if ( $metodo == 'GET' && preg_match( $regex, $url ) ) {
-    $controladora = new ControladoraLivro( $pdo, new VisaoLivro() );
-    $controladora->listar();
-} else if ( $metodo == 'GET' && preg_match( $regexId, $url, $casamentos ) ) {
-    [ , $id ] = $casamentos;
-    $controladora = new ControladoraLivro( $pdo, new VisaoLivro() );
-    $controladora->listarPorId( $id );
-} else if ( $metodo == 'POST' && preg_match( $regex, $url) ) {
-    $controladora = new ControladoraLivro( $pdo, new VisaoLivro() );
-    $controladora->adicionar();
-} else if ( $metodo == 'PUT' && preg_match( $regex, $url) ) {
-    $controladora = new ControladoraLivro( $pdo, new VisaoLivro() );
-    $controladora->atualizar();
-} else if ( $metodo == 'DELETE' && preg_match( $regexId, $url, $casamentos ) ) {
-    [ , $id ] = $casamentos;
-    $controladora = new ControladoraLivro( $pdo, new VisaoLivro() );
-    $controladora->remover( $id );
-}
+$app->run();

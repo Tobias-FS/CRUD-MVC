@@ -1,30 +1,39 @@
 <?php
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+
 class VisaoLivro {
 
-    public function obterdados() {
-        $dadosJson = file_get_contents( 'php://input' );
-        // error_log(print_r( $dadosJson, true));
-        $arrayDados = (array) json_decode( $dadosJson );
+    private $request;
+    private $response;
 
-        if ( empty( $arrayDados ) ) {
-            $this->exibirMensagemErro( 'Dados nulos', $codigo = 400 );
+    public function __construct( Request $request, Response $response ) {
+        $this->request = $request;
+        $this->response = $response;
+    }
+
+    public function obterdados() {
+        $dados = json_decode( $this->request->getBody()->getContents(), true );
+
+        if ( empty( $dados ) ) {
+            $this->exibirMensagemErro( 'Dados nulos', 400 );
         }
 
-        return $arrayDados;
+        return $dados;
     }
 
     public function exibirMensagemErro( $mensagem, $codigo = 400 ) {
-        http_response_code( $codigo );
-        header( 'Content-Type: application/json' );
-        echo json_encode( [ 'erro' => $mensagem ] );
-        exit;
+        $this->response = $this->response->withStatus( $codigo )
+                        ->withHeader( 'Content-type', 'application/json' );
+        $this->response->getBody()->write( json_encode( [ 'erro' => $mensagem ] ) );
+        return $this->response;
     }
 
-    public function exibirMensagem( $mensagem, $codigo = 200 ) {
-        http_response_code( $codigo );
-        header( 'Content-Type: application/json' );
-        echo json_encode( [ 'mensagem' => $mensagem ] );
-        exit; 
+    public function exibirMensagem( $mensagem, $codigo = 200 ): Response {
+        $this->response = $this->response->withStatus( $codigo )
+                        ->withHeader( 'Content-type', 'application/json' );
+        $this->response->getBody()->write( json_encode( $mensagem ) );
+        return $this->response;
     }
 }

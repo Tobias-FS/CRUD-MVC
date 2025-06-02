@@ -1,9 +1,5 @@
 <?php
 
-require_once 'Livro.php';
-require_once 'RepositorioLivro.php';
-require_once 'RepositorioException.php';
-
 class RepositorioLivroEmBDR implements RepositorioLivro {
 
     private $pdo = null;
